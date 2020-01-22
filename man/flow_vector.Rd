@@ -2,7 +2,7 @@
 % Please edit documentation in R/movement_models.R
 \name{flow_vector}
 \alias{flow_vector}
-\title{Vector of population flow between locatuons}
+\title{Vector of population flow between locations}
 \usage{
 flow_vector(pop_from, pop_to, distances, params, model = "gravity")
 }

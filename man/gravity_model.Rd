@@ -13,8 +13,8 @@ gravity_model(n_from, n_to, distance, params)
 
 \item{distance}{distance between the two places}
 
-\item{params}{a named list of gravity model parameters. The
-parameters are k, pow_from, pow_to, pow_dist.
+\item{params}{a named list of model parameters. For gravity model
+the parameters are k, pow_from, pow_to, pow_dist.
 destination}
 }
 \value{

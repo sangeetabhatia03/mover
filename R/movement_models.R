@@ -6,8 +6,8 @@
 ##' @param n_from population of the source
 ##' @param n_to population of the destination
 ##' @param distance distance between the two places
-##' @param params a named list of gravity model parameters. The
-##' parameters are k, pow_from, pow_to, pow_dist.
+##' @param params a named list of model parameters. For gravity model
+##' the parameters are k, pow_from, pow_to, pow_dist.
 ##' destination
 ##' @return estimated flow between source and destination
 ##' @author Sangeeta Bhatia
@@ -19,7 +19,7 @@ gravity_model <- function(n_from, n_to, distance, params) {
 
 }
 
-##' Vector of population flow between locatuons
+##' Vector of population flow between locations
 ##'
 ##' This function returns a vector of population flows under the
 ##' specified movement model with the given set of parameters.
@@ -70,3 +70,107 @@ flow_vector <- function(pop_from, pop_to, distances, params, model = "gravity") 
 
 
 }
+
+
+##' Population flow matrix
+##' @details flow from a location to itself is undefined (NA) under
+##' gravity model.
+##' @param populations vector of populations.
+##' @param distances  distance matrix. This is assumed to be symmetric
+##' so only lower triangle is of use.
+##' @param params a named list of model parameters. For gravity model
+##' the parameters are k, pow_from, pow_to, pow_dist.
+##'
+##' @param model at the moment only gravity model is supported.
+##'
+##' @param place_names optional. If not NULL, rownames of the returned
+##' matrix will be set.
+##' @param symmetric is the flow matrix symmetric. defaults to TRUE.
+##'
+##' @return N X N flow matrix where N is the length of the populations
+##' vector. i,jth element in this matrix is the flow from location i
+##' to location j. The diagonal is NA.
+##'
+##' @author Sangeeta Bhatia
+flow_matrix <- function(populations,
+                        distances,
+                        params,
+                        model = "gravity",
+                        place_names = NULL,
+                        symmetric = TRUE) {
+
+
+    assert_pop(populations)
+    assert_params(params, model)
+
+    if ((! is.matrix(distances)) ||
+        (nrow(distances) != length(populations))) {
+        msg <- paste(
+            "distances should be a ",
+            length(populations),
+            " X ",length(populations),
+            "matrix."
+        )
+        stop(msg)
+     }
+
+
+    out <- matrix(
+        NA, nrow = length(populations), ncol = length(populations)
+    )
+
+    ## out[i, j] = flow from i to j.
+    ## Fill the lower triangle by columns and the upper triangle by
+    ## rows.
+    for (to in seq_along(populations)) {
+
+        ## flow from a place to itself is undefined
+        ## at least under gravtiy model. So we grab everything except
+        ## the diagonal element.
+        ## For other models, this needs
+        ## to be checked.
+
+        n_from <- populations[-to]
+        n_to <- rep(populations[to], length(n_from))
+        distance <-  distances[-to, to]
+        flow <- flow_vector(
+            pop_from = n_from, pop_to = n_to, distance, params, model
+        )
+        if (to == 1) flow <- c(NA, flow)
+        else flow <- append(flow, NA, to - 1)
+        out[ , to] <- flow
+
+        if (symmetric) {
+
+            out[to, ] <- flow
+
+        } else {
+
+            flow <- flow_vector(
+                pop_from = n_to, pop_to = n_from, distance, params, model
+            )
+
+            if (to == 1) flow <- c(NA, flow)
+            else flow <- append(flow, NA, to - 1)
+
+            out[to, ] <- flow
+        }
+    }
+
+    if (! is.null(place_names)) {
+        if (length(place_names) != nrow(out)) {
+            warning(
+                "Length of names provided not same as row count of matrix.
+                 rownames not set."
+            )
+        } else {
+            rownames(out) <- place_names
+            colnames(out) <- place_names
+        }
+    }
+
+    out
+}
+
+
+

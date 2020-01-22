@@ -14,5 +14,6 @@ LazyData: true
 URL: https://github.com/sangeetabhatia03/mover
 BugReports: https://github.com/sangeetabhatia03/mover/issues
 Suggests: 
-    testthat
+    testthat,
+    covr
 RoxygenNote: 6.1.1
