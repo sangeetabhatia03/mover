@@ -92,6 +92,7 @@ flow_vector <- function(pop_from, pop_to, distances, params, model = "gravity") 
 ##' to location j. The diagonal is NA.
 ##'
 ##' @author Sangeeta Bhatia
+##' @export
 flow_matrix <- function(populations,
                         distances,
                         params,
